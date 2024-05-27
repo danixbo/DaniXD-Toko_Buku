@@ -1,14 +1,36 @@
 <?php
+class database {
+    private $host = "localhost";
+    private $user = "root";
+    private $database = "toko_buku_2";
+    private $pass = "";
+    private $konek;
 
-$host = "localhost";
-$db = "toko_buku_2";
-$user = "root";
-$pass = "";
+    public function conn() {
+        $this->konek = new mysqli($this->host, $this->user, $this->pass, $this->database);
+    }
 
-$conn = mysqli_connect($host, $user, $pass, $db);
+    public function data($query) {
+        $result = $this->konek->query($query);
+        $data = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+        return $data;
+    }
 
-if (!$conn) {
-    die("Koneksi Gagal: " . mysqli_connect_error());
+    public function execute($query, $params) {
+        $stmt = $this->konek->prepare($query);
+        $types = str_repeat('s', count($params));
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    public function close() {
+        $this->konek->close();
+    }
 }
-// mysqli_close($conn);
 ?>
